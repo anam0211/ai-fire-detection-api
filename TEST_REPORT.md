@@ -56,4 +56,10 @@ Sau bổ sung, chạy bằng `.venv`: **66 passed**, cùng một deprecation war
 
 `AI_Fire_Web_Integration.zip` chứa 9 file dành cho web, không chứa model, virtualenv hoặc key thật. Đã kiểm tra ZIP, JSON cấu hình, schema response và cú pháp JavaScript. Postman chưa được chạy bằng ứng dụng Postman; client Node đã được kiểm thử qua HTTP thật. Model gốc vẫn giữ nguyên hash. Chưa push GitHub/deploy Render, chưa có URL HTTPS cloud được xác minh.
 
-Bản `AI_Fire_Detection_Handoff` cập nhật cũng đạt **66 passed**, cùng một cảnh báo TestClient. Kiểm thử HTTP thật và client Node từ chính bản bàn giao tại cổng tạm `http://127.0.0.1:59021` đều PASS; server đã dừng. Gói source `AI_Fire_API_Render.zip` gồm 34 file allowlist và manifest, có model gốc, không có virtualenv/cache/key thật. Hash model trong ZIP và từng file của manifest đã được đối chiếu.
+Bản `AI_Fire_Detection_Handoff` cập nhật cũng đạt **66 passed**, cùng một cảnh báo TestClient. Kiểm thử HTTP thật và client Node từ chính bản bàn giao tại cổng tạm `http://127.0.0.1:59021` đều PASS; server đã dừng. Gói source `AI_Fire_API_Render.zip` hiện gồm 35 file allowlist và manifest, có model gốc, không có virtualenv/cache/key thật. Hash model trong ZIP và từng file của manifest đã được đối chiếu.
+
+## Chuẩn bị push và triển khai sau khi được cho phép
+
+Đã tạo repository Git local tại `AI_Fire_Detection_Handoff`, nhánh `main`, và commit bộ source đã kiểm tra. `.gitattributes` giữ nguyên byte của file giữa Windows/Linux để checksum trong manifest không thay đổi khi checkout. Đã kiểm tra từng file được stage khớp manifest và model giữ nguyên SHA-256. `.git` không đi vào ZIP bàn giao.
+
+Tại bước này GitHub và Render chưa được kết nối với tài khoản qua các kết nối ứng dụng; không có GitHub/Render CLI hoặc token tương ứng trong môi trường. Đã tìm được ứng dụng hỗ trợ cả hai dịch vụ. Chưa tạo repository từ xa, chưa push hoặc deploy; chưa có URL HTTPS đã xác minh. Cần hoàn tất kết nối tài khoản để tiếp tục, không cần cấp lại quyền push/deploy.
