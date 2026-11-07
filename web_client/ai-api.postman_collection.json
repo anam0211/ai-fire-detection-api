@@ -1,0 +1,243 @@
+{
+  "info": {
+    "name": "AI Fire API - Web Integration",
+    "description": "Use a private API key in the selected environment. No cloud URL has been deployed by this bundle.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "X-API-Key",
+        "type": "string"
+      },
+      {
+        "key": "value",
+        "value": "{{api_key}}",
+        "type": "string"
+      },
+      {
+        "key": "in",
+        "value": "header",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Health (public)",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/health",
+        "description": "",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Send one sample (repeat 10 times to warm up)",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/v1/sensor-data",
+        "description": "Send sequentially about once per second. First nine samples return COLLECTING.",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"device_id\": \"{{device_id}}\",\n  \"temperature\": 29.2,\n  \"infrared\": 0\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Read latest status",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/v1/status/{{device_id}}",
+        "description": ""
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Temperature spike (after warmup)",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/v1/sensor-data",
+        "description": "",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"device_id\": \"{{device_id}}\",\n  \"temperature\": 120,\n  \"infrared\": 0\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Direct IR signal (new test device)",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/v1/sensor-data",
+        "description": "",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"device_id\": \"{{device_id}}_ir\",\n  \"temperature\": 29.2,\n  \"infrared\": 1\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Invalid payload -> 422",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/v1/sensor-data",
+        "description": "",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"device_id\": \"{{device_id}}\",\n  \"temperature\": 126,\n  \"infrared\": 0\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 422\", function () { pm.response.to.have.status(422); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "No API key -> 401",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/v1/sensor-data",
+        "description": "",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"device_id\": \"{{device_id}}\",\n  \"temperature\": 29.2,\n  \"infrared\": 0\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\", function () { pm.response.to.have.status(401); });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

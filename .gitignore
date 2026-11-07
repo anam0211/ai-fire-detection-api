@@ -1,0 +1,48 @@
+# Environments, caches, generated handoff (the handoff itself can be a standalone repo)
+.venv*/
+venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage*
+htmlcov/
+.ipynb_checkpoints/
+AI_Fire_Detection_Handoff/
+
+# Local configuration, credentials and personal sensor data
+.env
+.env.*
+!.env.example
+secrets.*
+!secrets.example.h
+secrets/
+*.pem
+*.key
+*.crt
+credentials*
+secrets.h
+data/
+private/
+logs/
+*.log
+*.csv
+!example_normal_SIMULATED.csv
+*.sqlite*
+*.db
+
+# IDE, OS and temporary output
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.tmp
+*.bak
+*.zip
+dist/
+build/
+
+# The original deployment artifact MUST be tracked.
+!model.joblib

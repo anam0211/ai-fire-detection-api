@@ -1,0 +1,465 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AI IoT Flame Sensor API",
+    "version": "1.1.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthStatus"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthUnavailable"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sensor-data": {
+      "post": {
+        "summary": "Send one new sample; infer after 10 samples per device",
+        "operationId": "sensor_data_api_v1_sensor_data_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SensorSample"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SensorStatus"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ]
+      }
+    },
+    "/api/v1/status/{device_id}": {
+      "get": {
+        "summary": "Read Status",
+        "operationId": "read_status_api_v1_status__device_id__get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "device_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "title": "Device Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SensorStatus"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AIResult": {
+        "properties": {
+          "model": {
+            "type": "string",
+            "const": "IsolationForest",
+            "title": "Model"
+          },
+          "ready": {
+            "type": "boolean",
+            "title": "Ready"
+          },
+          "result": {
+            "type": "string",
+            "enum": [
+              "INSUFFICIENT_DATA",
+              "NORMAL",
+              "ANOMALY",
+              "MODEL_ERROR"
+            ],
+            "title": "Result"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score",
+            "description": "Decision score, not fire probability"
+          }
+        },
+        "type": "object",
+        "required": [
+          "model",
+          "ready",
+          "result",
+          "score"
+        ],
+        "title": "AIResult"
+      },
+      "ErrorResponse": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "title": "ErrorResponse"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthStatus": {
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "title": "Ok"
+          },
+          "model": {
+            "type": "string",
+            "const": "IsolationForest",
+            "title": "Model"
+          },
+          "window_size": {
+            "type": "integer",
+            "const": 10,
+            "title": "Window Size"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ok",
+          "model",
+          "window_size"
+        ],
+        "title": "HealthStatus"
+      },
+      "HealthUnavailable": {
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "title": "Ok"
+          },
+          "model": {
+            "type": "string",
+            "const": "IsolationForest",
+            "title": "Model"
+          },
+          "window_size": {
+            "type": "integer",
+            "const": 10,
+            "title": "Window Size"
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ok",
+          "model",
+          "window_size",
+          "detail"
+        ],
+        "title": "HealthUnavailable"
+      },
+      "SensorSample": {
+        "properties": {
+          "device_id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "title": "Device Id"
+          },
+          "temperature": {
+            "type": "number",
+            "maximum": 125.0,
+            "minimum": -40.0,
+            "title": "Temperature",
+            "description": "Degrees Celsius"
+          },
+          "infrared": {
+            "type": "integer",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Infrared",
+            "description": "1=IR flame signal; normalize ESP32 active-LOW logic before POST"
+          }
+        },
+        "type": "object",
+        "required": [
+          "device_id",
+          "temperature",
+          "infrared"
+        ],
+        "title": "SensorSample"
+      },
+      "SensorStatus": {
+        "properties": {
+          "device_id": {
+            "type": "string",
+            "title": "Device Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "COLLECTING",
+              "NORMAL",
+              "ANOMALY",
+              "FLAME_SIGNAL"
+            ],
+            "title": "Status"
+          },
+          "risk_level": {
+            "type": "string",
+            "enum": [
+              "UNKNOWN",
+              "LOW",
+              "MEDIUM",
+              "HIGH"
+            ],
+            "title": "Risk Level"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "SYSTEM",
+              "AI",
+              "DIRECT_SENSOR"
+            ],
+            "title": "Source"
+          },
+          "sensors": {
+            "$ref": "#/components/schemas/SensorValues"
+          },
+          "ai": {
+            "$ref": "#/components/schemas/AIResult"
+          },
+          "alarm_suggested": {
+            "type": "boolean",
+            "title": "Alarm Suggested"
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp",
+            "description": "UTC ISO-8601 time of the last accepted sample"
+          },
+          "online": {
+            "type": "boolean",
+            "title": "Online"
+          }
+        },
+        "type": "object",
+        "required": [
+          "device_id",
+          "status",
+          "risk_level",
+          "source",
+          "sensors",
+          "ai",
+          "alarm_suggested",
+          "timestamp",
+          "online"
+        ],
+        "title": "SensorStatus"
+      },
+      "SensorValues": {
+        "properties": {
+          "temperature": {
+            "type": "number",
+            "title": "Temperature"
+          },
+          "infrared": {
+            "type": "integer",
+            "enum": [
+              0,
+              1
+            ],
+            "title": "Infrared"
+          }
+        },
+        "type": "object",
+        "required": [
+          "temperature",
+          "infrared"
+        ],
+        "title": "SensorValues"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "APIKeyHeader": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      }
+    }
+  }
+}

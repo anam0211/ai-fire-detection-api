@@ -1,0 +1,2 @@
+# Keep release manifest hashes identical across Windows/Linux Git checkouts.
+* -text

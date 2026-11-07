@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: ai-fire-detection-api
+    runtime: python
+    plan: free
+    numInstances: 1
+    buildCommand: pip install -r requirements.txt
+    startCommand: python api.py
+    healthCheckPath: /health
+    autoDeployTrigger: "off"
+    envVars:
+      - key: API_KEY
+        generateValue: true
+      - key: DASHBOARD_ORIGINS
+        sync: false
+      - key: PYTHONUNBUFFERED
+        value: "1"
