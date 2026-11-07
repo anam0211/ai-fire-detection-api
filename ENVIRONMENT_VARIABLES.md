@@ -16,7 +16,7 @@ Không có biến để đổi model path, window, features hoặc score thresho
 | Thông số người tích hợp cần nhận | Giá trị |
 | --- | --- |
 | Base URL local | `http://127.0.0.1:8000` |
-| Base URL cloud | **Chưa được cấp/xác minh**; lấy URL HTTPS thực từ Render sau deploy. |
+| Base URL cloud | https://ai-fire-detection-api.onrender.com — đã kiểm thử HTTPS ngày 07/11/2026; xem DEPLOYMENT_REPORT.md. |
 | POST | `/api/v1/sensor-data` |
 | GET trạng thái | `/api/v1/status/{device_id}` |
 | Health | `/health` (không key) |

@@ -6,7 +6,7 @@ API phục vụ model Isolation Forest có sẵn để ESP32 và Dashboard chỉ
 
 `AI_Fire_API_Render.zip` là gói source triển khai đầy đủ, gồm model gốc và cấu hình Render; giải nén rồi đưa nội dung lên repo theo hướng dẫn phía dưới. Tạo lại cả gói source và gói web bằng `python scripts/build_handoff.py` từ source gốc. ZIP sinh ra không cần đưa vào Git.
 
-**Trạng thái:** đã kiểm thử local bằng model thật và HTTP thật; chưa deploy Render, chưa có URL cloud đã xác minh. Xem [TEST_REPORT.md](TEST_REPORT.md).
+**Trạng thái 07/11/2026:** đã push [GitHub](https://github.com/anam0211/ai-fire-detection-api), deploy Render Free tại Singapore và kiểm thử HTTPS thành công: https://ai-fire-detection-api.onrender.com. Xem [DEPLOYMENT_REPORT.md](DEPLOYMENT_REPORT.md) để lấy cấu hình thực tế, kết quả kiểm thử và thông tin API key.
 
 ## Những gì được giữ nguyên và thay đổi
 
@@ -127,4 +127,4 @@ Blueprint tắt tự động deploy (`autoDeployTrigger: off`). Cấu hình mặ
 - `scripts/smoke_test.py`: kiểm thử URL local hoặc HTTPS, chỉ cần Python standard library.
 - `scripts/build_handoff.py`: chạy từ source gốc để tạo/cập nhật bộ bàn giao bằng allowlist, không copy môi trường ảo, secret hoặc file tạm. `HANDOFF_MANIFEST.json` ghi SHA-256 từng file trong bộ bàn giao.
 
-Sau deploy, bàn giao **URL thật, X-API-Key qua kênh riêng, device_id, origin Dashboard đã cho phép và ngày/kết quả smoke test HTTPS**. Hiện URL cloud vẫn chưa được cấp/xác minh.
+Sau deploy, bàn giao **URL thật, X-API-Key qua kênh riêng, device_id, origin Dashboard đã cho phép và ngày/kết quả smoke test HTTPS**. URL cloud đã xác minh: https://ai-fire-detection-api.onrender.com. API key lấy riêng từ Render Environment hoặc `.env` local (không commit). Service được tạo trực tiếp qua MCP; xem [DEPLOYMENT_REPORT.md](DEPLOYMENT_REPORT.md).

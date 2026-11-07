@@ -63,8 +63,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 13171,
-      "sha256": "c0532157fce6d37e9835e6b18222588fba3ff8e4b88e524158fbe443233b0221"
+      "bytes": 13541,
+      "sha256": "26289b4acb98d6004842d6fb43544fa76f0ede0b92df7294ff9a6d8429735997"
     },
     {
       "path": "API_DOCUMENTATION.md",
@@ -78,13 +78,13 @@
     },
     {
       "path": "ENVIRONMENT_VARIABLES.md",
-      "bytes": 3242,
-      "sha256": "b8a0aba586d7d56ead0d2490ebba5d8204957d035026943794cc552fa06d9f83"
+      "bytes": 3274,
+      "sha256": "150a9c2efa6ff21af0c5b33c0d72c9562b55c333116aa35d887ed614b4440d7e"
     },
     {
       "path": "TEST_REPORT.md",
-      "bytes": 6637,
-      "sha256": "98fa7b78dcf738c3f8235048150c2202d7e1fd7248d704ecd92aee99bba0c92c"
+      "bytes": 7332,
+      "sha256": "a6d9f06ef005be91b2b8f34ed6cd7fef2f4185d94e3aeb3b6282b166caa1ed5e"
     },
     {
       "path": "train_fire_ai_colab.ipynb",
@@ -138,8 +138,8 @@
     },
     {
       "path": "WEB_INTEGRATION.md",
-      "bytes": 5682,
-      "sha256": "b73661b87522c8e6f63a52700e22b0bb372aec2ea13f8bfccd7cf57bab141dff"
+      "bytes": 5760,
+      "sha256": "26c981a4d6f78470ca4dcf707c4abd80645caea6552f5ad024e5cf6701467cdd"
     },
     {
       "path": "scripts/build_web_handoff.py",

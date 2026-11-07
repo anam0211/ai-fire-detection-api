@@ -63,3 +63,7 @@ Bản `AI_Fire_Detection_Handoff` cập nhật cũng đạt **66 passed**, cùng
 Đã tạo repository Git local tại `AI_Fire_Detection_Handoff`, nhánh `main`, và commit bộ source đã kiểm tra. `.gitattributes` giữ nguyên byte của file giữa Windows/Linux để checksum trong manifest không thay đổi khi checkout. Đã kiểm tra từng file được stage khớp manifest và model giữ nguyên SHA-256. `.git` không đi vào ZIP bàn giao.
 
 Tại bước này GitHub và Render chưa được kết nối với tài khoản qua các kết nối ứng dụng; không có GitHub/Render CLI hoặc token tương ứng trong môi trường. Đã tìm được ứng dụng hỗ trợ cả hai dịch vụ. Chưa tạo repository từ xa, chưa push hoặc deploy; chưa có URL HTTPS đã xác minh. Cần hoàn tất kết nối tài khoản để tiếp tục, không cần cấp lại quyền push/deploy.
+
+## Triển khai cloud hoàn tất — 07/11/2026
+
+Đã push repo công khai `anam0211/ai-fire-detection-api`, nhánh main, và deploy Render Free tại Singapore. Deploy `dep-dbnj5hgu01pc73ctfqv0` đã **live**; URL https://ai-fire-detection-api.onrender.com. Toàn bộ smoke test HTTPS (gồm offline/reconnect) và client Node đều PASS, chứng chỉ TLS đã xác minh, health/docs/schema HTTP 200. Model giữ nguyên hash gốc, build Render kiểm tra checksum thành công. Xem [DEPLOYMENT_REPORT.md](DEPLOYMENT_REPORT.md) cho commit chạy, cấu hình, key và phạm vi xác minh. Các ghi chú chưa kết nối/chưa deploy bên trên mô tả các lần chuẩn bị trước.

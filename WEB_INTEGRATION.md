@@ -10,7 +10,7 @@ Thiết bị → Backend web → POST API AI → Backend web → Dashboard
 
 | Thông tin | Giá trị |
 | --- | --- |
-| URL cloud | Chưa deploy/xác minh; thay bằng URL HTTPS thực sau deploy Render. |
+| URL cloud | https://ai-fire-detection-api.onrender.com — smoke test và client Node HTTPS đã đạt ngày 07/11/2026. |
 | URL thử local | `http://127.0.0.1:8000` nếu cùng máy; máy khác dùng IP LAN của máy chạy API. |
 | Biến môi trường trên backend web | `AI_API_URL`, `AI_API_KEY` |
 | Header | `X-API-Key: <key cấp riêng>` |
@@ -81,4 +81,4 @@ Script tạo ID thử mới, kiểm tra health, key sai, 404, warmup, NORMAL, AN
 
 Source deploy ở `AI_Fire_Detection_Handoff`, có `render.yaml`, `model.joblib` và requirements khóa scikit-learn 1.6.1. Xem README để chạy local/deploy. Cấp API key riêng cho backend web; key client `AI_API_KEY` phải bằng biến `API_KEY` của API. Giữ **1 worker/instance**, trạng thái đang lưu RAM và mất sau restart.
 
-Để kiểm tra cả API và client web từ source bằng server tạm: `.\.venv\Scripts\python.exe scripts\verify_local.py --check-web-client`. Chưa push GitHub hay deploy Render trong lần chuẩn bị này; URL cloud chưa được cấp.
+Để kiểm tra cả API và client web từ source bằng server tạm: `.\.venv\Scripts\python.exe scripts\verify_local.py --check-web-client`. Đã push GitHub, deploy Render và kiểm thử client Node qua HTTPS ngày 07/11/2026. Xem [DEPLOYMENT_REPORT.md](DEPLOYMENT_REPORT.md).
