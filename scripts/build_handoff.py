@@ -9,7 +9,7 @@ import sys
 from zipfile import ZIP_DEFLATED, ZipFile
 
 ROOT = Path(__file__).resolve().parents[1]
-DESTINATION = ROOT / "AI_Fire_Detection_Handoff"
+DESTINATION = ROOT if ROOT.name == "AI_Fire_Detection_Handoff" else ROOT / "AI_Fire_Detection_Handoff"
 FILES = (
     "api.py", "model.joblib", "model.sha256", "requirements.txt", "requirements-dev.txt",
     ".python-version", ".env.example", ".gitignore", ".gitattributes", ".dockerignore", "render.yaml", "pytest.ini",
@@ -22,6 +22,13 @@ FILES = (
     "web_client/ai-client.mjs", "web_client/example.mjs", "web_client/verify.mjs",
     "web_client/.env.example", "web_client/ai-api.postman_collection.json",
     "web_client/local.postman_environment.json",
+    "legacy_api.py", "risk_v2/__init__.py", "risk_v2/api.py", "risk_v2/engine.py",
+    "risk_v2/policy.json", "risk_v2/model_candidate_v2.joblib",
+    "risk_v2/model_candidate_v2.training.json", "risk_v2/evaluation.json",
+    "risk_v2/openapi.json", "risk_v2/README.md", "risk_v2/sensor-log.csv.example",
+    "risk_v2/verify-client.mjs", "scripts/train_temperature_v2.py",
+    "scripts/evaluate_risk_v2.py", "scripts/verify_risk_v2.py", "tests/test_risk_v2.py",
+    "DEPLOYMENT_REPORT.md",
 )
 
 
@@ -30,8 +37,6 @@ def digest(path):
 
 
 def main():
-    if ROOT.name == "AI_Fire_Detection_Handoff":
-        raise RuntimeError("Run the packaging script from the source project, not from the handoff copy")
     subprocess.run([sys.executable, str(ROOT / "scripts" / "build_web_handoff.py")], check=True)
     expected = (ROOT / "model.sha256").read_text(encoding="utf-8").split()[0]
     if digest(ROOT / "model.joblib") != expected:
@@ -39,7 +44,7 @@ def main():
     for name in FILES:
         if not (ROOT / name).is_file():
             raise FileNotFoundError(f"Missing handoff input: {name}")
-    if DESTINATION.exists():
+    if DESTINATION != ROOT and DESTINATION.exists():
         unexpected = [p.relative_to(DESTINATION).as_posix() for p in DESTINATION.rglob("*")
                       if p.is_file() and p.relative_to(DESTINATION).parts[0] != ".git"
                       and p.relative_to(DESTINATION).as_posix() not in (*FILES, "HANDOFF_MANIFEST.json")]
@@ -49,6 +54,8 @@ def main():
     for name in FILES:
         source, target = ROOT / name, DESTINATION / name
         target.parent.mkdir(parents=True, exist_ok=True)
+        if source == target:
+            continue
         if name == "model.joblib" and target.exists():
             if digest(target) != expected:
                 raise RuntimeError("Handoff model differs; refusing to overwrite model.joblib")

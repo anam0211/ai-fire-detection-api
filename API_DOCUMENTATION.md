@@ -1,131 +1,92 @@
-# API Documentation — v1
+# API Documentation — 2.0.0-demo
 
-Base URL local: `http://127.0.0.1:8000`. Base URL cloud: dùng URL HTTPS do Render thực sự cấp sau deploy, chưa có URL đã xác minh trong lần bàn giao này. Không thêm dấu `/` cuối vào biến base URL trong ví dụ.
+Base URL: https://ai-fire-detection-api.onrender.com. Schema đầy đủ: `openapi.json` hoặc `/openapi.json`; Swagger `/docs`.
 
-## Xác thực và CORS
+## Xác thực
 
-Hai endpoint `/api/v1/*` yêu cầu `X-API-Key: <key đã được cấp>`. Không gửi key trong body/query string. `/health`, `/docs`, `/redoc`, `/openapi.json` công khai. Swagger có nút Authorize để đặt header. CORS chỉ cho browser origin được cấu hình trong `DASHBOARD_ORIGINS`; ESP32 không chịu CORS. CORS không thay thế xác thực hay phân quyền. Cùng một key hiện truy cập được mọi `device_id`.
-
-## GET /health
-
-Không cần API key. Chỉ trả healthy sau khi nạp và thử suy luận model thành công tại startup.
-
-`200 OK`:
-
-```json
-{"ok": true, "model": "IsolationForest", "window_size": 10}
-```
-
-Sau lỗi suy luận, `503 Service Unavailable`:
-
-```json
-{"ok": false, "model": "IsolationForest", "window_size": 10, "detail": "Model inference unavailable"}
-```
-
-Health trở về `200` sau suy luận thành công tiếp theo. Thiếu/hỏng artifact hoặc scikit-learn khác 1.6.1 khiến startup dừng và ghi lỗi trong log; khi đó chưa có API phục vụ HTTP. Không tự train hay tạo model thay thế.
+Hai endpoint /api/v1/* dùng header `X-API-Key`; thiếu/sai trả 401. /health, /docs và /openapi.json công khai. CORS lấy từ DASHBOARD_ORIGINS; backend/ESP32 không cần CORS. Key chung truy cập mọi device_id.
 
 ## POST /api/v1/sensor-data
 
-Header: `Content-Type: application/json`, `X-API-Key: <key>`.
-
 ```json
-{"device_id": "esp32_01", "temperature": 29.2, "infrared": 0}
+{"device_id":"esp32_01","temperature":65,"infrared":1}
 ```
 
-| Field | Yêu cầu |
-| --- | --- |
-| `device_id` | Chuỗi 1–64 ký tự, chỉ `A-Z a-z 0-9 _ -`; ID phải duy nhất và ổn định giữa ESP32 và Dashboard. |
-| `temperature` | Số JSON hữu hạn, trong `[-40, 125]` °C; chấp nhận `30` hoặc `30.5`, từ chối `"30"`, bool, null, NaN, Infinity. |
-| `infrared` | Số nguyên JSON chính xác `0` hoặc `1`; từ chối `1.0`, `"1"`, bool, null. `1` nghĩa là cảm biến thấy tín hiệu lửa, không phải mức điện áp raw. |
+- device_id: 1–64 ký tự A–Z, a–z, 0–9, dấu gạch dưới/gạch ngang.
+- temperature: số JSON hữu hạn trong [-40,125] °C; từ chối chuỗi, bool, null, NaN/Infinity.
+- infrared: số nguyên JSON 0 hoặc 1; từ chối bool, 1.0, chuỗi và giá trị khác.
+- Trường dư được bỏ qua. Không nhận timestamp thiết bị; dùng thời gian server nhận mẫu.
+- Gửi tuần tự khoảng 1 Hz, một nguồn/mỗi ID, không replay backlog hoặc nhân đôi mẫu khi Dashboard refresh.
 
-Cả ba field đều bắt buộc. Field dư bị bỏ qua như API cũ. API dùng thời gian nhận mẫu, không nhận timestamp thiết bị. Mẫu được tính theo thứ tự server xử lý; không có sequence number hay loại mẫu trùng. Chỉ gửi tuần tự từ một nguồn cho mỗi ID.
-
-`200 OK` trong chín mẫu đầu (`infrared=0`):
+Response giữ 9 trường v1 và thêm assessment. Ví dụ mẫu đầu nhiệt 65°C + IR:
 
 ```json
 {
   "device_id": "esp32_01",
-  "status": "COLLECTING",
-  "risk_level": "UNKNOWN",
-  "source": "SYSTEM",
-  "sensors": {"temperature": 29.2, "infrared": 0},
-  "ai": {"model": "IsolationForest", "ready": false, "result": "INSUFFICIENT_DATA", "score": null},
-  "alarm_suggested": false,
-  "timestamp": "2026-11-07T11:00:00+00:00",
-  "online": true
+  "status": "FLAME_SIGNAL",
+  "risk_level": "MEDIUM",
+  "source": "SENSOR_FUSION",
+  "sensors": {"temperature":65,"infrared":1},
+  "ai": {"model":"IsolationForest","ready":false,"result":"INSUFFICIENT_DATA","score":null},
+  "alarm_suggested": true,
+  "timestamp": "2026-11-09T00:00:00+00:00",
+  "online": true,
+  "assessment": {
+    "reasons": ["ELEVATED_TEMPERATURE","IR_UNCONFIRMED"],
+    "temperature_rise_c_per_min": null,
+    "observation_seconds": 0,
+    "policy_version": "near-heat-demo-v2",
+    "model_version": "temperature-v2-synthetic_demo",
+    "training_provenance": "synthetic_demo",
+    "experimental": true
+  }
 }
 ```
 
-Ví dụ `200 OK` sau 10 mẫu fixture normal; timestamp minh họa, score từ model thật:
+Timestamp minh họa. Thời gian quan sát và score phản ánh cửa sổ thực.
 
-```json
-{
-  "device_id": "esp32_01",
-  "status": "NORMAL",
-  "risk_level": "LOW",
-  "source": "AI",
-  "sensors": {"temperature": 29.14, "infrared": 0},
-  "ai": {"model": "IsolationForest", "ready": true, "result": "NORMAL", "score": 0.11054322360111468},
-  "alarm_suggested": false,
-  "timestamp": "2026-11-07T11:00:09+00:00",
-  "online": true
-}
-```
+## Policy được chọn
 
-## Phân loại và ý nghĩa JSON
+| Điều kiện | risk_level | status/source chủ yếu |
+| --- | --- | --- |
+| Nhiệt ≥85°C | HIGH ngay | THERMAL_DANGER / THERMAL_RULE |
+| IR liên tiếp ≥3 mẫu trong ≥2 giây và nhiệt ≥75°C | HIGH | FLAME_SIGNAL / SENSOR_FUSION |
+| IR xác nhận, nhiệt ≥65°C, tốc độ tăng ≥20°C/phút và tổng tăng ≥2°C | HIGH | FLAME_SIGNAL / SENSOR_FUSION |
+| Nhiệt ≥65°C, chưa đạt điều kiện HIGH | MEDIUM | THERMAL_WARNING hoặc FLAME_SIGNAL |
+| Tăng ≥12°C/phút và tổng tăng ≥2°C | Ít nhất MEDIUM | THERMAL_WARNING |
+| AI âm ≥3 lần liên tiếp, nhiệt ≥55°C, tổng tăng ≥2°C và xu hướng tăng | Ít nhất MEDIUM | ANOMALY |
+| IR=1, nhiệt ổn định <65°C, chưa có cảnh báo khác | LOW, không đề xuất còi | FLAME_SIGNAL / DIRECT_SENSOR |
+| Chưa đủ 10 mẫu, không có IR hoặc điều kiện cảnh báo | UNKNOWN | COLLECTING / SYSTEM |
+| Đủ mẫu nhưng không có cảnh báo được xác nhận | LOW | NORMAL hoặc ANOMALY / AI |
 
-| Điều kiện, theo thứ tự ưu tiên | `status` | `risk_level` | `source` | `alarm_suggested` |
-| --- | --- | --- | --- | --- |
-| Mẫu hiện tại có IR=1, kể cả khi chưa đủ 10 mẫu | `FLAME_SIGNAL` | `HIGH` | `DIRECT_SENSOR` | `true` |
-| IR=0, đủ mẫu, score < 0 | `ANOMALY` | `MEDIUM` | `AI` | `true` |
-| IR=0, đủ mẫu, score >= 0 | `NORMAL` | `LOW` | `AI` | `false` |
-| IR=0, chưa đủ 10 mẫu | `COLLECTING` | `UNKNOWN` | `SYSTEM` | `false` |
+Điều kiện ưu tiên từ trên xuống. IR đơn lẻ không được nâng HIGH, kể cả kéo dài. `alarm_suggested=true` khi risk MEDIUM/HIGH, false khi LOW/UNKNOWN. Đây là gợi ý để backend thực hiện cảnh báo; API không điều khiển còi trực tiếp.
 
-`sensors` là mẫu mới nhất. `ai.result` độc lập với `status`: khi IR=1, trạng thái luôn ưu tiên `FLAME_SIGNAL`, còn AI vẫn có thể trả NORMAL/ANOMALY/INSUFFICIENT_DATA. `ai.ready` nói AI có kết quả sử dụng được từ cửa sổ hiện tại. `ai.score` là điểm `decision_function`, **không phải xác suất hoặc phần trăm cháy**.
+Tốc độ tăng tính hồi quy theo thời gian server nhận mẫu, chỉ có kết quả nếu cửa sổ kéo dài 5–30 giây. Với cửa sổ quá ngắn/dài, trường tốc độ là null; ngưỡng nhiệt tuyệt đối vẫn hoạt động.
 
-Các đặc trưng giữ nguyên: `temp_mean`, `temp_max`, `temp_change = nhiệt độ cuối - đầu`, `flame_ratio` trên 10 mẫu gần nhất, dtype float32. Một device không sử dụng mẫu của device khác. Nếu khoảng cách từ mẫu được chấp nhận cuối tới mẫu mới >=10 giây, mẫu mới bắt đầu cửa sổ riêng và AI thu lại 10 mẫu. Chu kỳ dự kiến khoảng 1 giây/mẫu; API chưa kiểm tra chính xác chu kỳ này.
+Hysteresis: khi điều kiện tức thời giảm mức, API giữ mức cũ bằng RECOVERY_HOLD cho đến khi nhiệt ≤55°C, IR=0, hết dấu hiệu tăng nhiệt/AI warming, đủ ≥3 mẫu và ≥5 giây xác nhận. Nếu nguy cơ trở lại, bộ đếm nguội bắt đầu lại. Vì vậy mức đang giữ có thể cao hơn hàng tương ứng trong bảng.
 
-`timestamp` là UTC ISO-8601 tại lần POST thành công; `online=true` trong POST. `alarm_suggested` chỉ là gợi ý để hệ thống tích hợp xử lý phù hợp. **ANOMALY không xác nhận cháy; NORMAL không xác nhận an toàn.** Model gốc đã cho NORMAL với 10 mẫu cố định 100°C trong kiểm thử kỹ thuật. `FLAME_SIGNAL` cũng chỉ là tín hiệu cảm biến cần được đánh giá theo thiết kế hệ thống.
+AI dùng 10 mẫu riêng từng ID với temp_mean, temp_max, temp_change, temp_std float32. Model không dùng IR làm đặc trưng nhiệt. Score âm là bất thường, không phải xác suất cháy. Policy nhiệt/IR độc lập có thể trả HIGH khi AI chưa đủ mẫu hoặc model nói NORMAL.
+
+## Enum và field
+
+- status: COLLECTING, NORMAL, ANOMALY, FLAME_SIGNAL, THERMAL_WARNING, THERMAL_DANGER, RECOVERY_HOLD.
+- risk_level: UNKNOWN, LOW, MEDIUM, HIGH.
+- source: SYSTEM, AI, DIRECT_SENSOR, THERMAL_RULE, SENSOR_FUSION, HYSTERESIS.
+- ai.result: INSUFFICIENT_DATA, NORMAL, ANOMALY, MODEL_ERROR.
+- assessment.reasons: các mã lý do để giải thích; không dùng như enum cố định cho điều khiển còi. Các mã gồm HIGH_TEMPERATURE, PERSISTENT_IR_WITH_HEAT, ELEVATED_TEMPERATURE, RAPID_TEMPERATURE_RISE, IR_CONFIRMED, IR_UNCONFIRMED, IR_ALONE_NEAR_EXPECTED_HEAT_SOURCE, AI_ANOMALY_WITH_WARMING, AI_ANOMALY_UNCORROBORATED, RECOVERY_HOLD, COOLING_CONFIRMED, NO_CORROBORATED_HAZARD.
 
 ## GET /api/v1/status/{device_id}
 
-Cần `X-API-Key`. ID tuân thủ cùng quy tắc như POST. `200 OK` trả đúng chín trường JSON của lần POST thành công cuối, cập nhật riêng `online` thành `(thời gian từ mẫu cuối < 10 giây)`. Đúng mốc 10 giây là offline. GET không thêm mẫu hay cập nhật timestamp. Dữ liệu cũ vẫn giữ nguyên để Dashboard biết đây là trạng thái cuối trước khi mất kết nối.
+Trả trạng thái cuối, chỉ tính lại online=(thời gian từ mẫu cuối <10 giây). GET không tạo mẫu, không đổi timestamp. Đúng 10 giây là offline. Trạng thái cuối vẫn giữ; mất kết nối không phải hết cảnh báo.
 
-Khi thiết bị gửi lại sau khi offline, API không dùng cửa sổ cũ: trả `COLLECTING` / `INSUFFICIENT_DATA` cho tới khi nhận đủ 10 mẫu mới. IR=1 vẫn ưu tiên `FLAME_SIGNAL` trong giai đoạn thu mẫu. Thay đổi này ngăn AI suy luận từ các mẫu thuộc hai phiên gửi cách xa nhau; giữ nguyên cấu trúc JSON và thuật toán model.
+Nếu khoảng ngừng gửi ≥10 giây, mẫu POST tiếp theo bắt đầu cửa sổ và counters mới; cảnh báo nhiệt tuyệt đối vẫn đánh giá ngay. ID chưa gửi hoặc RAM vừa bị xóa: 404. Chỉ dùng 1 worker/instance.
 
-Thiết bị chưa gửi mẫu hoặc server vừa restart: `404`:
+## GET /health và lỗi
 
-```json
-{"detail": "No samples received for this device"}
-```
+Health OK: `{"ok":true,"model":"IsolationForest","window_size":10}`.
 
-Lịch sử và trạng thái nằm trong RAM, mất khi sleep/restart/redeploy. Chỉ dùng **1 worker / 1 instance**; không chia tải nhiều instance nếu chưa chuyển sang kho trạng thái chung.
+Nếu lần suy luận gần nhất lỗi: HTTP 503, ok=false. Suy luận thành công tiếp theo khôi phục health. Nếu model lỗi trong POST, vẫn trả đánh giá độc lập từ nhiệt/IR hoặc mức cảnh báo cần giữ, ai.result=MODEL_ERROR, ready=false, score=null. Nếu không có bằng chứng độc lập để phục vụ request thì trả 503 và không ghi mẫu. Thiếu/hỏng model hoặc checksum sai làm startup thất bại.
 
-## HTTP status và lỗi
+401: key sai/thiếu; 404: chưa có dữ liệu; 422: dữ liệu sai; 503: model không sẵn sàng. Không ghi lại input/secret trong lỗi validation. Không tự retry POST sau timeout.
 
-| HTTP | Khi nào | Hành động tích hợp |
-| --- | --- | --- |
-| `200` | Thành công, kể cả COLLECTING và FLAME_SIGNAL khi AI lỗi | Đọc cả `status`, `ai`, `online`. |
-| `401` | Thiếu/sai API key trên endpoint dữ liệu | Kiểm tra key; không retry liên tục. |
-| `404` | Chưa có mẫu cho device, hoặc đường dẫn không tồn tại | Kiểm tra ID, server restart và dữ liệu đã gửi. |
-| `422` | Body/ID/số liệu/JSON không hợp lệ | Sửa payload; mẫu bị từ chối không vào cửa sổ. |
-| `503` | Lỗi suy luận với IR=0; hoặc health đang lỗi | Ghi nhận API/AI chưa sẵn sàng, giữ cảnh báo độc lập tại thiết bị. |
-| `400` trên preflight | Origin, method hoặc header CORS không được phép | Sửa cấu hình origin/request. |
-
-Lỗi key: `{"detail":"Missing or invalid X-API-Key"}`. Lỗi model: `{"detail":"Model inference unavailable"}`; chi tiết exception nằm ở server log, không trả stack trace/path ra client.
-
-Ví dụ lỗi validation (giá trị gốc và context được lược bỏ để không phản chiếu secret hoặc NaN):
-
-```json
-{"detail": [{"type": "less_than_equal", "loc": ["body", "temperature"], "msg": "Input should be less than or equal to 125"}]}
-```
-
-Lỗi suy luận không ghi lịch sử/trạng thái mới nếu IR=0. Nếu IR=1 thì vẫn ghi và trả chín trường JSON với `status=FLAME_SIGNAL`, `risk_level=HIGH`, `source=DIRECT_SENSOR`, `alarm_suggested=true`, và:
-
-```json
-{"model": "IsolationForest", "ready": false, "result": "MODEL_ERROR", "score": null}
-```
-
-Đây là nội dung của field `ai`, không phải một response đầy đủ mới. Bổ sung `MODEL_ERROR` để tránh báo NORMAL khi model lỗi và không làm mất tín hiệu trực tiếp từ IR. Sau lỗi model, `/health` trả 503 cho tới lần suy luận tốt tiếp theo hoặc restart thành công.
-
-Timeout/mất mạng/502 do nền tảng có thể xảy ra ngoài API. Không tự replay cùng POST sau timeout: không có idempotency key, nên cùng mẫu có thể được đếm hai lần. Chuyển sang mẫu hiện tại ở chu kỳ tiếp theo và xử lý cảnh báo local độc lập.
+Model v2 được train bằng dữ liệu mô phỏng và các ngưỡng là cấu hình thử nghiệm được chọn, chưa hiệu chuẩn/kiểm chứng cháy thực. LOW/NORMAL không xác nhận an toàn.

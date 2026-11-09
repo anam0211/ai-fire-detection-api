@@ -1,8 +1,8 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "AI IoT Flame Sensor API",
-    "version": "1.1.0"
+    "title": "Fire API - DS18B20 temperature and IR",
+    "version": "2.0.0-demo"
   },
   "paths": {
     "/health": {
@@ -19,23 +19,13 @@
                 }
               }
             }
-          },
-          "503": {
-            "description": "Service Unavailable",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HealthUnavailable"
-                }
-              }
-            }
           }
         }
       }
     },
     "/api/v1/sensor-data": {
       "post": {
-        "summary": "Send one new sample; infer after 10 samples per device",
+        "summary": "Sensor Data",
         "operationId": "sensor_data_api_v1_sensor_data_post",
         "requestBody": {
           "content": {
@@ -54,26 +44,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SensorStatus"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Service Unavailable",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -129,26 +99,6 @@
                 }
               }
             }
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Not Found"
           },
           "422": {
             "description": "Validation Error",
@@ -209,18 +159,63 @@
         ],
         "title": "AIResult"
       },
-      "ErrorResponse": {
+      "Assessment": {
         "properties": {
-          "detail": {
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reasons"
+          },
+          "temperature_rise_c_per_min": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperature Rise C Per Min"
+          },
+          "observation_seconds": {
+            "type": "number",
+            "title": "Observation Seconds"
+          },
+          "policy_version": {
             "type": "string",
-            "title": "Detail"
+            "title": "Policy Version"
+          },
+          "model_version": {
+            "type": "string",
+            "title": "Model Version"
+          },
+          "training_provenance": {
+            "type": "string",
+            "enum": [
+              "synthetic_demo",
+              "real_sensor_data"
+            ],
+            "title": "Training Provenance"
+          },
+          "experimental": {
+            "type": "boolean",
+            "const": true,
+            "title": "Experimental"
           }
         },
         "type": "object",
         "required": [
-          "detail"
+          "reasons",
+          "temperature_rise_c_per_min",
+          "observation_seconds",
+          "policy_version",
+          "model_version",
+          "training_provenance",
+          "experimental"
         ],
-        "title": "ErrorResponse"
+        "title": "Assessment"
       },
       "HTTPValidationError": {
         "properties": {
@@ -259,36 +254,6 @@
           "window_size"
         ],
         "title": "HealthStatus"
-      },
-      "HealthUnavailable": {
-        "properties": {
-          "ok": {
-            "type": "boolean",
-            "title": "Ok"
-          },
-          "model": {
-            "type": "string",
-            "const": "IsolationForest",
-            "title": "Model"
-          },
-          "window_size": {
-            "type": "integer",
-            "const": 10,
-            "title": "Window Size"
-          },
-          "detail": {
-            "type": "string",
-            "title": "Detail"
-          }
-        },
-        "type": "object",
-        "required": [
-          "ok",
-          "model",
-          "window_size",
-          "detail"
-        ],
-        "title": "HealthUnavailable"
       },
       "SensorSample": {
         "properties": {
@@ -334,7 +299,10 @@
               "COLLECTING",
               "NORMAL",
               "ANOMALY",
-              "FLAME_SIGNAL"
+              "FLAME_SIGNAL",
+              "THERMAL_WARNING",
+              "THERMAL_DANGER",
+              "RECOVERY_HOLD"
             ],
             "title": "Status"
           },
@@ -353,7 +321,10 @@
             "enum": [
               "SYSTEM",
               "AI",
-              "DIRECT_SENSOR"
+              "DIRECT_SENSOR",
+              "THERMAL_RULE",
+              "SENSOR_FUSION",
+              "HYSTERESIS"
             ],
             "title": "Source"
           },
@@ -369,12 +340,14 @@
           },
           "timestamp": {
             "type": "string",
-            "title": "Timestamp",
-            "description": "UTC ISO-8601 time of the last accepted sample"
+            "title": "Timestamp"
           },
           "online": {
             "type": "boolean",
             "title": "Online"
+          },
+          "assessment": {
+            "$ref": "#/components/schemas/Assessment"
           }
         },
         "type": "object",
@@ -387,7 +360,8 @@
           "ai",
           "alarm_suggested",
           "timestamp",
-          "online"
+          "online",
+          "assessment"
         ],
         "title": "SensorStatus"
       },

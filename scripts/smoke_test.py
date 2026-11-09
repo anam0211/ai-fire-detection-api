@@ -11,7 +11,7 @@ from urllib.request import Request, urlopen
 from uuid import uuid4
 
 NORMAL = [29.18, 29.18, 29.23, 29.24, 29.20, 29.20, 29.18, 29.18, 29.13, 29.14]
-KEYS = {"device_id", "status", "risk_level", "source", "sensors", "ai", "alarm_suggested", "timestamp", "online"}
+KEYS = {"device_id", "status", "risk_level", "source", "sensors", "ai", "alarm_suggested", "timestamp", "online", "assessment"}
 
 
 def check(condition, message):
@@ -54,12 +54,13 @@ def main():
     prefix = "smoke_" + uuid4().hex[:12]
     normal_id, other_id = prefix + "_normal", prefix + "_other"
 
-    def post(device, temperature, infrared=0):
+    def post(device, temperature, infrared=0, *, pause=True):
         result, _ = call("POST", "/api/v1/sensor-data", {
             "device_id": device, "temperature": temperature, "infrared": infrared,
         })
         check(set(result) == KEYS, "Response JSON fields changed")
-        if args.interval:
+        check(result["assessment"]["policy_version"] == "near-heat-demo-v2", "Wrong active policy")
+        if args.interval and pause:
             time.sleep(args.interval)
         return result
 
@@ -72,14 +73,14 @@ def main():
     call("GET", f"/api/v1/status/{normal_id}", expected=404)
     print("PASS authentication and unknown device")
 
-    # Interleave a second device. It must remain COLLECTING while the first reaches 10 samples.
+    # Interleave a hot device: thermal rules work before its own AI window fills.
     for i, temperature in enumerate(NORMAL):
         normal = post(normal_id, temperature)
         if i < 9:
             check(normal["status"] == "COLLECTING", "AI became ready before 10 samples")
         if i < 5:
             other = post(other_id, 100)
-            check(other["status"] == "COLLECTING", "Device windows were mixed")
+            check(other["risk_level"] == "HIGH" and not other["ai"]["ready"], "Immediate thermal rule failed")
     check(normal["status"] == "NORMAL" and normal["ai"]["score"] >= 0, "Normal fixture was not NORMAL")
     check(normal["alarm_suggested"] is False, "NORMAL suggested an alarm")
     print(f"PASS NORMAL with 10 samples; score={normal['ai']['score']:.8f}")
@@ -93,13 +94,32 @@ def main():
     check(unchanged["timestamp"] == normal["timestamp"], "Second device changed the first device's status")
     print("PASS two independent devices")
     anomaly = post(normal_id, 120)
-    check(anomaly["status"] == "ANOMALY" and anomaly["ai"]["score"] < 0, "120 C did not produce an anomaly")
-    check(anomaly["risk_level"] == "MEDIUM" and anomaly["source"] == "AI", "Anomaly semantics changed")
-    print(f"PASS ANOMALY; score={anomaly['ai']['score']:.8f}")
+    check(anomaly["status"] == "THERMAL_DANGER", "120 C did not produce thermal danger")
+    check(anomaly["risk_level"] == "HIGH" and anomaly["source"] == "THERMAL_RULE", "Thermal semantics changed")
+    print("PASS temperature-only HIGH, independent of AI score")
     flame = post(prefix + "_ir", 29.2, 1)
     check(flame["status"] == "FLAME_SIGNAL" and flame["source"] == "DIRECT_SENSOR", "Direct IR signal lost")
-    check(flame["alarm_suggested"] is True, "IR signal did not suggest an alarm")
-    print("PASS FLAME_SIGNAL before AI is ready")
+    check(flame["risk_level"] == "LOW" and flame["alarm_suggested"] is False, "IR alone incorrectly triggered alarm")
+    print("PASS IR alone is LOW and recorded before AI is ready")
+    warning = post(prefix + "_warning", 65, 1)
+    check(warning["risk_level"] == "MEDIUM" and warning["alarm_suggested"], "65 C + IR did not warn")
+    fusion_id = prefix + "_fusion"
+    first = post(fusion_id, 75, 1)
+    check(first["risk_level"] == "MEDIUM", "IR was confirmed too early")
+    time.sleep(1.05)
+    post(fusion_id, 75, 1)
+    time.sleep(1.05)
+    fused = post(fusion_id, 75, 1)
+    check(fused["risk_level"] == "HIGH" and fused["source"] == "SENSOR_FUSION", "Timed IR/heat fusion failed")
+    print("PASS 65 C warning and confirmed IR + 75 C HIGH")
+    rise_id = prefix + "_rise"
+    for i in range(6):
+        rising = post(rise_id, 65 + i, 1, pause=False)
+        if i < 5:
+            time.sleep(1.05)
+    check(rising["risk_level"] == "HIGH" and "RAPID_TEMPERATURE_RISE" in rising["assessment"]["reasons"],
+          "IR + rising temperature >=65 C did not reach HIGH")
+    print("PASS confirmed IR + rapid warming below 75 C HIGH")
     for payload in [
         {"device_id": prefix, "temperature": 126, "infrared": 0},
         {"device_id": prefix, "temperature": 30, "infrared": 2},

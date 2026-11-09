@@ -1,0 +1,20 @@
+{
+  "version": "near-heat-demo-v2",
+  "warning_temperature_c": 65.0,
+  "danger_temperature_c": 85.0,
+  "clear_temperature_c": 55.0,
+  "rise_warning_c_per_min": 12.0,
+  "minimum_rise_c": 2.0,
+  "minimum_observation_seconds": 5.0,
+  "maximum_observation_seconds": 30.0,
+  "ir_confirmation_samples": 3,
+  "ir_confirmation_seconds": 2.0,
+  "ir_only_risk": "LOW",
+  "fusion_temperature_c": 75.0,
+  "fusion_rise_c_per_min": 20.0,
+  "ai_warning_min_temperature_c": 55.0,
+  "ai_warning_min_rise_c": 2.0,
+  "ai_confirmation_samples": 3,
+  "clear_samples": 3,
+  "clear_seconds": 5.0
+}

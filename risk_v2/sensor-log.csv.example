@@ -1,0 +1,4 @@
+session_id,timestamp_ms,temperature,infrared,label
+measured_cooking_session_01,0,45.2,1,normal
+measured_cooking_session_01,1000,45.3,1,normal
+measured_cooking_session_01,2000,45.3,1,normal

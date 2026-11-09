@@ -1,4 +1,14 @@
-# Kiểm tra và sửa phần AI — 07/11/2026
+# Kiểm tra AI — lịch sử và cập nhật API v2
+
+## API v2 cho backend — 09/11/2026
+
+Đã chọn profile `near-heat-demo-v2` theo bảng nhiệt/IR: IR đơn lẻ ở nhiệt ổn định dưới 65°C là LOW; IR+nhiệt 65°C ít nhất MEDIUM; IR liên tiếp ≥3 mẫu trong ≥2 giây kèm nhiệt ≥75°C là HIGH; IR đã xác nhận+nhiệt ≥65°C+tăng ≥20°C/phút/tổng tăng ≥2°C là HIGH; nhiệt ≥85°C HIGH ngay.
+
+Entrypoint api.py phục vụ v2; code v1 giữ ở legacy_api.py. Model gốc không đổi hash. Model v2 được train từ mô phỏng, lưu riêng và xác minh checksum trước khi nạp; chưa có dữ liệu thật hoặc đánh giá độ chính xác phát hiện cháy thực tế.
+
+Kiểm thử local: **121 passed**, một deprecation warning TestClient. `verify_local.py --check-web-client` qua HTTP thật PASS health, auth, 404, normal sau 10 mẫu, thiết bị độc lập, cảnh báo nhiệt trước warmup, IR-only LOW, nhiệt+IR MEDIUM, cả hai đường phối hợp lên HIGH, validation, offline, reconnect và Node backend client. Các báo cáo ngày 07/11 bên dưới là lịch sử v1; trạng thái deploy v2 ghi trong DEPLOYMENT_REPORT.md.
+
+## Kiểm tra và sửa phần AI — 07/11/2026
 
 ## Các vấn đề đã tái hiện và sửa
 

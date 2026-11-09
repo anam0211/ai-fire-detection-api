@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 import numpy as np
 import pytest
 
-import api
+import legacy_api as api
 
 # Public, non-production credentials used only by the tests.
 TEST_KEY = "test-only-key-do-not-use-in-production-123456"

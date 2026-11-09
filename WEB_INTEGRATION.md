@@ -1,84 +1,84 @@
-# Giao cho người làm backend web
+# Tích hợp backend web — API nhiệt độ/IR v2
 
-Web đã nhận số liệu thiết bị: chỉ cần chuyển **mỗi mẫu mới** từ backend web sang API AI, lấy response để hiển thị. Người làm web không cần Python hoặc model.
+Base URL: **https://ai-fire-detection-api.onrender.com**. Swagger: https://ai-fire-detection-api.onrender.com/docs.
 
-```text
-Thiết bị → Backend web → POST API AI → Backend web → Dashboard
+Backend chỉ cần gọi HTTP, không cần cài Python/model. Dùng URL và key đã cấp trước đó; không đưa key vào frontend hoặc Git.
+
+```env
+AI_API_URL=https://ai-fire-detection-api.onrender.com
+AI_API_KEY=<key cấp riêng>
 ```
 
-## Thông tin kết nối
+## Gửi mỗi mẫu mới
 
-| Thông tin | Giá trị |
+```http
+POST /api/v1/sensor-data
+Content-Type: application/json
+X-API-Key: <AI_API_KEY>
+
+{"device_id":"esp32_01","temperature":29.2,"infrared":0}
+```
+
+Một nguồn gửi cho mỗi device_id; tuần tự khoảng một mẫu/giây. IR phải chuẩn hóa 1=có tín hiệu lửa, 0=không; không gửi điện áp active-LOW raw. Temperature phải là số đo hợp lệ từ DS18B20, không gửi sentinel lỗi.
+
+## Đọc kết quả
+
+`GET /api/v1/status/esp32_01` với cùng header key chỉ đọc trạng thái cuối, không thêm mẫu.
+
+Dùng **risk_level, alarm_suggested, online** để hiển thị/xử lý. Không suy ra mức nguy hiểm từ `FLAME_SIGNAL` hoặc score âm.
+
+| Tình huống | Mức |
 | --- | --- |
-| URL cloud | https://ai-fire-detection-api.onrender.com — smoke test và client Node HTTPS đã đạt ngày 07/11/2026. |
-| URL thử local | `http://127.0.0.1:8000` nếu cùng máy; máy khác dùng IP LAN của máy chạy API. |
-| Biến môi trường trên backend web | `AI_API_URL`, `AI_API_KEY` |
-| Header | `X-API-Key: <key cấp riêng>` |
-| Gửi 1 mẫu mới | `POST /api/v1/sensor-data` |
-| Đọc kết quả cuối, không thêm mẫu | `GET /api/v1/status/{device_id}` |
-| Kiểm tra API | `GET /health`, không cần key |
-| Schema đầy đủ | `openapi.json`, hoặc `/openapi.json` trên server đang chạy |
+| Flame đơn lẻ, nhiệt ổn định dưới 65°C | LOW, alarm_suggested=false |
+| Flame + nhiệt từ 65°C | Ít nhất MEDIUM, alarm_suggested=true |
+| ≥3 mẫu flame liên tiếp trong ≥2 giây + nhiệt ≥75°C | HIGH |
+| Flame xác nhận + nhiệt ≥65°C, tăng ≥20°C/phút và tổng tăng ≥2°C | HIGH |
+| Nhiệt ≥85°C, bất kể flame | HIGH ngay |
 
-Không điền API key thật vào file bàn giao hoặc frontend. Nếu backend web gọi API thì CORS trình duyệt không áp dụng; chỉ cần cấu hình DASHBOARD_ORIGINS khi browser gọi trực tiếp. Chọn **một nguồn gửi mẫu**: backend web gửi thì ESP32 không gửi thêm cùng mẫu vào AI.
+Cảnh báo nhiệt hoạt động trước khi AI đủ 10 mẫu. Tăng nhiệt phải có cửa sổ quan sát 5–30 giây, tính theo thời gian server nhận mẫu; không gửi dồn để thử tốc độ tăng nhiệt.
 
-## Tích hợp nhanh bằng JavaScript phía server
+Sau cảnh báo, có thể trả `RECOVERY_HOLD` và giữ mức cũ. Chỉ hạ mức khi nhiệt ≤55°C, IR=0 và hết dấu hiệu tăng nhiệt, đủ ít nhất 3 mẫu và 5 giây xác nhận. `online=false` là mất dữ liệu, không đồng nghĩa đã an toàn.
 
-Copy `web_client/ai-client.mjs` vào backend có `fetch` (đã kiểm thử Node 22.20.0), không cần npm package. Đặt URL/key trong biến môi trường server. Xem hook đầy đủ ở `web_client/example.mjs`.
+## Client Node
+
+Copy `web_client/ai-client.mjs` vào backend Node có fetch; không cần npm dependency.
 
 ```javascript
 import { createAiClient } from "./ai-client.mjs";
 
 const ai = createAiClient({
   baseUrl: process.env.AI_API_URL,
-  apiKey: process.env.AI_API_KEY
+  apiKey: process.env.AI_API_KEY,
 });
 
-// Đặt trong luồng đang nhận dữ liệu thiết bị, chỉ chạy một lần cho mỗi mẫu mới.
-try {
-  const result = await ai.sendSample({
-    device_id: sensor.device_id,
-    temperature: sensor.temperature,
-    infrared: sensor.infrared
-  });
-  // Lưu result hoặc gửi qua socket cho Dashboard bằng code hiện có của web.
-} catch (error) {
-  // Vẫn lưu số liệu cảm biến; báo AI chưa sẵn sàng. Không gán NORMAL khi lỗi.
-}
+const result = await ai.sendSample({
+  device_id: "esp32_01",
+  temperature: 65,
+  infrared: 1,
+});
+
+console.log(result.risk_level, result.alarm_suggested);
+console.log(result.assessment.reasons);
+// Lưu response hoặc gửi qua socket tới Dashboard.
+// await ai.getStatus("esp32_01") chỉ đọc, không gửi lại mẫu.
 ```
 
-Body ví dụ: `{"device_id":"esp32_01","temperature":29.2,"infrared":0}`. Nhiệt độ là số °C trong [-40,125]; IR là số nguyên 0/1, với 1=có tín hiệu lửa. Không gửi chuỗi `"29.2"` hoặc boolean.
-
-Gửi khoảng 1 mẫu/giây, tuần tự theo mỗi device; giữ nguyên ID và thứ tự dữ liệu. Không gửi lại lịch sử hoặc gửi khi refresh trang/poll trạng thái. Không tự replay POST sau timeout vì server có thể đã nhận mẫu. Client có timeout 120 giây để xử lý cold start; không có retry ngầm. Backend phải quản lý luồng theo từng thiết bị để không chồng request hoặc tích tụ mẫu cũ khi mạng chậm. API hiện chưa nhận sample_id/timestamp thiết bị để chống trùng hoặc phát hiện mẫu quá cũ.
-
-## Response để Dashboard hiển thị
-
-| `status` | `risk_level` | Hiển thị |
-| --- | --- | --- |
-| `COLLECTING` | `UNKNOWN` | Đang thu 10 mẫu, chưa có kết quả AI. |
-| `NORMAL` | `LOW` | Model chưa đánh dấu bất thường. |
-| `ANOMALY` | `MEDIUM` | Có bất thường, cần kiểm tra. |
-| `FLAME_SIGNAL` | `HIGH` | Cảm biến IR báo tín hiệu lửa. |
-
-Response giữ các field `device_id`, `status`, `risk_level`, `source`, `sensors`, `ai`, `alarm_suggested`, `timestamp`, `online`. `ai.ready=false` khi chưa đủ mẫu hoặc AI lỗi; `score` không phải xác suất cháy. Ngừng gửi >=10 giây thì lần gửi lại bắt đầu cửa sổ mới. GET trả `online=false` sau 10 giây không có mẫu và giữ timestamp cuối. Chưa có mẫu hoặc server vừa restart: GET trả 404.
-
-Xử lý lỗi: 401=key sai/thiếu; 422=payload sai; 503=model lỗi. Khi IR=1 mà AI lỗi, vẫn nhận FLAME_SIGNAL với `ai.result=MODEL_ERROR`. Không có trạng thái xác nhận cháy. Model hiện **bỏ sót 100–120°C cố định**; chỉ tích hợp thử nghiệm và giữ cảnh báo nhiệt độ/IR độc lập.
-
-## Kiểm tra kết nối từ máy backend web
-
-Import `web_client/ai-api.postman_collection.json` và `web_client/local.postman_environment.json` vào Postman. Chọn environment, đặt `base_url` thực và `api_key` riêng. Request gửi mẫu chỉ gửi một mẫu, cần gửi đủ 10 mẫu của cùng ID để AI ready.
-
-Hoặc dùng client kiểm thử HTTP thật:
+Hook đầy đủ: `web_client/example.mjs`. Kiểm tra từ backend sau khi đặt URL/key:
 
 ```powershell
-$env:AI_API_URL = "http://127.0.0.1:8000" # Thay bằng URL thực
-# Đặt AI_API_KEY qua cấu hình riêng của backend, không commit key.
-node web_client\verify.mjs
+node web_client/verify.mjs
 ```
 
-Script tạo ID thử mới, kiểm tra health, key sai, 404, warmup, NORMAL, ANOMALY, IR và GET. Không gửi vào ID thiết bị thật. Sau deploy phải chạy lại với HTTPS thực, không coi kiểm thử local là deploy thành công.
+Postman collection và environment không có key thật nằm trong `web_client`; đặt base_url và api_key riêng trước khi chạy.
 
-## Phần dành cho người vận hành API
+## Thay đổi cần cập nhật phía backend
 
-Source deploy ở `AI_Fire_Detection_Handoff`, có `render.yaml`, `model.joblib` và requirements khóa scikit-learn 1.6.1. Xem README để chạy local/deploy. Cấp API key riêng cho backend web; key client `AI_API_KEY` phải bằng biến `API_KEY` của API. Giữ **1 worker/instance**, trạng thái đang lưu RAM và mất sau restart.
+Request, URL và header giữ nguyên. Response thêm `assessment`, gồm reasons, temperature_rise_c_per_min, observation_seconds, policy_version, model_version, training_provenance và experimental.
 
-Để kiểm tra cả API và client web từ source bằng server tạm: `.\.venv\Scripts\python.exe scripts\verify_local.py --check-web-client`. Đã push GitHub, deploy Render và kiểm thử client Node qua HTTPS ngày 07/11/2026. Xem [DEPLOYMENT_REPORT.md](DEPLOYMENT_REPORT.md).
+Status hợp lệ: COLLECTING, NORMAL, ANOMALY, FLAME_SIGNAL, THERMAL_WARNING, THERMAL_DANGER, RECOVERY_HOLD. Source: SYSTEM, AI, DIRECT_SENSOR, THERMAL_RULE, SENSOR_FUSION, HYSTERESIS.
+
+`ai.ready=false` không có nghĩa risk thấp: nhiệt 85°C vẫn HIGH ngay. `ai.result` và risk độc lập. API trả gợi ý, backend/ESP32 mới thực hiện còi/thông báo.
+
+401: kiểm tra key. 422: kiểm tra payload. 503/timeout: hiển thị mất kết nối hoặc lỗi AI, không thay bằng NORMAL. Không tự retry POST sau timeout vì server có thể đã nhận mẫu. Chờ mẫu mới.
+
+Trạng thái RAM mất khi server sleep/restart. GET có thể trả 404 sau restart hoặc trước mẫu đầu. Khi khoảng ngừng gửi ≥10 giây, mẫu tiếp theo mở cửa sổ mới. Ngưỡng v2 là profile thử nghiệm được chọn; chưa đánh giá độ chính xác cháy thực tế.

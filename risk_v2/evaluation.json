@@ -1,0 +1,325 @@
+{
+  "synthetic_scenarios_only": true,
+  "field_validated": false,
+  "policy_version": "near-heat-demo-v2",
+  "original_model_sha256": "9986dbd0f66591b8a406a0450fad0ddc83fd726155ec650d9638ff4a90637bd2",
+  "model_version": "temperature-v2-synthetic_demo",
+  "scenarios": [
+    {
+      "scenario": "room_29",
+      "input_last_temperature_c": 29.2,
+      "input_last_ir": 0,
+      "v1_risk": "LOW",
+      "v1_score": 0.13320734236698445,
+      "v2_risk": "LOW",
+      "v2_score": 0.09092450794305962,
+      "expected_demo_risk": "LOW",
+      "passed": true,
+      "reasons": [
+        "NO_CORROBORATED_HAZARD"
+      ]
+    },
+    {
+      "scenario": "warm_room_38",
+      "input_last_temperature_c": 38.0,
+      "input_last_ir": 0,
+      "v1_risk": "LOW",
+      "v1_score": 0.05758512868086807,
+      "v2_risk": "LOW",
+      "v2_score": 0.10427346359094414,
+      "expected_demo_risk": "LOW",
+      "passed": true,
+      "reasons": [
+        "NO_CORROBORATED_HAZARD"
+      ]
+    },
+    {
+      "scenario": "stable_45",
+      "input_last_temperature_c": 45.0,
+      "input_last_ir": 0,
+      "v1_risk": "LOW",
+      "v1_score": 0.05758512868086807,
+      "v2_risk": "LOW",
+      "v2_score": 0.12083261551066393,
+      "expected_demo_risk": "LOW",
+      "passed": true,
+      "reasons": [
+        "NO_CORROBORATED_HAZARD"
+      ]
+    },
+    {
+      "scenario": "cooking_55_with_ir",
+      "input_last_temperature_c": 55.0,
+      "input_last_ir": 1,
+      "v1_risk": "HIGH",
+      "v1_score": 0.05758512868086807,
+      "v2_risk": "LOW",
+      "v2_score": 0.08464426456251617,
+      "expected_demo_risk": "LOW",
+      "passed": true,
+      "reasons": [
+        "IR_CONFIRMED",
+        "IR_ALONE_NEAR_EXPECTED_HEAT_SOURCE"
+      ]
+    },
+    {
+      "scenario": "stable_60_no_ir",
+      "input_last_temperature_c": 60.0,
+      "input_last_ir": 0,
+      "v1_risk": "LOW",
+      "v1_score": 0.05758512868086807,
+      "v2_risk": "LOW",
+      "v2_score": 0.02370641770233739,
+      "expected_demo_risk": "LOW",
+      "passed": true,
+      "reasons": [
+        "NO_CORROBORATED_HAZARD"
+      ]
+    },
+    {
+      "scenario": "stable_65_no_ir",
+      "input_last_temperature_c": 65.0,
+      "input_last_ir": 0,
+      "v1_risk": "LOW",
+      "v1_score": 0.05758512868086807,
+      "v2_risk": "MEDIUM",
+      "v2_score": 0.011202037315893754,
+      "expected_demo_risk": "MEDIUM",
+      "passed": true,
+      "reasons": [
+        "ELEVATED_TEMPERATURE"
+      ]
+    },
+    {
+      "scenario": "stable_85_no_ir",
+      "input_last_temperature_c": 85.0,
+      "input_last_ir": 0,
+      "v1_risk": "LOW",
+      "v1_score": 0.05758512868086807,
+      "v2_risk": "HIGH",
+      "v2_score": 0.011202037315893754,
+      "expected_demo_risk": "HIGH",
+      "passed": true,
+      "reasons": [
+        "HIGH_TEMPERATURE",
+        "ELEVATED_TEMPERATURE"
+      ]
+    },
+    {
+      "scenario": "stable_100_no_ir",
+      "input_last_temperature_c": 100.0,
+      "input_last_ir": 0,
+      "v1_risk": "LOW",
+      "v1_score": 0.05758512868086807,
+      "v2_risk": "HIGH",
+      "v2_score": 0.011202037315893754,
+      "expected_demo_risk": "HIGH",
+      "passed": true,
+      "reasons": [
+        "HIGH_TEMPERATURE",
+        "ELEVATED_TEMPERATURE"
+      ]
+    },
+    {
+      "scenario": "stable_120_no_ir",
+      "input_last_temperature_c": 120.0,
+      "input_last_ir": 0,
+      "v1_risk": "LOW",
+      "v1_score": 0.05758512868086807,
+      "v2_risk": "HIGH",
+      "v2_score": 0.011202037315893754,
+      "expected_demo_risk": "HIGH",
+      "passed": true,
+      "reasons": [
+        "HIGH_TEMPERATURE",
+        "ELEVATED_TEMPERATURE"
+      ]
+    },
+    {
+      "scenario": "single_ir_room",
+      "input_last_temperature_c": 29.2,
+      "input_last_ir": 1,
+      "v1_risk": "HIGH",
+      "v1_score": null,
+      "v2_risk": "LOW",
+      "v2_score": null,
+      "expected_demo_risk": "LOW",
+      "passed": true,
+      "reasons": [
+        "IR_UNCONFIRMED",
+        "IR_ALONE_NEAR_EXPECTED_HEAT_SOURCE"
+      ]
+    },
+    {
+      "scenario": "persistent_ir_room",
+      "input_last_temperature_c": 29.2,
+      "input_last_ir": 1,
+      "v1_risk": "HIGH",
+      "v1_score": 0.13320734236698445,
+      "v2_risk": "LOW",
+      "v2_score": 0.09092450794305962,
+      "expected_demo_risk": "LOW",
+      "passed": true,
+      "reasons": [
+        "IR_CONFIRMED",
+        "IR_ALONE_NEAR_EXPECTED_HEAT_SOURCE"
+      ]
+    },
+    {
+      "scenario": "ir_plus_mild_heat",
+      "input_last_temperature_c": 48.0,
+      "input_last_ir": 1,
+      "v1_risk": "HIGH",
+      "v1_score": 0.05758512868086807,
+      "v2_risk": "LOW",
+      "v2_score": 0.11550867971202339,
+      "expected_demo_risk": "LOW",
+      "passed": true,
+      "reasons": [
+        "IR_CONFIRMED",
+        "IR_ALONE_NEAR_EXPECTED_HEAT_SOURCE"
+      ]
+    },
+    {
+      "scenario": "ir_plus_65_heat",
+      "input_last_temperature_c": 65.0,
+      "input_last_ir": 1,
+      "v1_risk": "HIGH",
+      "v1_score": 0.05758512868086807,
+      "v2_risk": "MEDIUM",
+      "v2_score": 0.011202037315893754,
+      "expected_demo_risk": "MEDIUM",
+      "passed": true,
+      "reasons": [
+        "ELEVATED_TEMPERATURE",
+        "IR_CONFIRMED"
+      ]
+    },
+    {
+      "scenario": "ir_plus_78_heat",
+      "input_last_temperature_c": 78.0,
+      "input_last_ir": 1,
+      "v1_risk": "HIGH",
+      "v1_score": 0.05758512868086807,
+      "v2_risk": "HIGH",
+      "v2_score": 0.011202037315893754,
+      "expected_demo_risk": "HIGH",
+      "passed": true,
+      "reasons": [
+        "PERSISTENT_IR_WITH_HEAT",
+        "ELEVATED_TEMPERATURE",
+        "IR_CONFIRMED"
+      ]
+    },
+    {
+      "scenario": "rapid_rise_no_ir",
+      "input_last_temperature_c": 33.0,
+      "input_last_ir": 0,
+      "v1_risk": "MEDIUM",
+      "v1_score": -0.01766558977139554,
+      "v2_risk": "MEDIUM",
+      "v2_score": -0.06588587767477982,
+      "expected_demo_risk": "MEDIUM",
+      "passed": true,
+      "reasons": [
+        "RAPID_TEMPERATURE_RISE",
+        "AI_ANOMALY_UNCORROBORATED"
+      ]
+    },
+    {
+      "scenario": "rapid_rise_plus_ir_low_temp",
+      "input_last_temperature_c": 33.0,
+      "input_last_ir": 1,
+      "v1_risk": "HIGH",
+      "v1_score": -0.01766558977139554,
+      "v2_risk": "MEDIUM",
+      "v2_score": -0.06588587767477982,
+      "expected_demo_risk": "MEDIUM",
+      "passed": true,
+      "reasons": [
+        "RAPID_TEMPERATURE_RISE",
+        "IR_CONFIRMED",
+        "AI_ANOMALY_UNCORROBORATED"
+      ]
+    },
+    {
+      "scenario": "rapid_rise_plus_ir_high_temp",
+      "input_last_temperature_c": 69.0,
+      "input_last_ir": 1,
+      "v1_risk": "HIGH",
+      "v1_score": -0.01766558977139554,
+      "v2_risk": "HIGH",
+      "v2_score": -0.12324287873914408,
+      "expected_demo_risk": "HIGH",
+      "passed": true,
+      "reasons": [
+        "PERSISTENT_IR_WITH_HEAT",
+        "ELEVATED_TEMPERATURE",
+        "RAPID_TEMPERATURE_RISE",
+        "IR_CONFIRMED",
+        "AI_ANOMALY_UNCORROBORATED"
+      ]
+    },
+    {
+      "scenario": "falling_temperature",
+      "input_last_temperature_c": 30.0,
+      "input_last_ir": 0,
+      "v1_risk": "MEDIUM",
+      "v1_score": -0.037584063090297715,
+      "v2_risk": "LOW",
+      "v2_score": -0.07024760997009993,
+      "expected_demo_risk": "LOW",
+      "passed": true,
+      "reasons": [
+        "AI_ANOMALY_UNCORROBORATED"
+      ]
+    },
+    {
+      "scenario": "cold_room",
+      "input_last_temperature_c": 10.0,
+      "input_last_ir": 0,
+      "v1_risk": "LOW",
+      "v1_score": 0.047862665696348894,
+      "v2_risk": "LOW",
+      "v2_score": -0.005467517148091461,
+      "expected_demo_risk": "LOW",
+      "passed": true,
+      "reasons": [
+        "AI_ANOMALY_UNCORROBORATED"
+      ]
+    },
+    {
+      "scenario": "small_noise",
+      "input_last_temperature_c": 30.0,
+      "input_last_ir": 0,
+      "v1_risk": "LOW",
+      "v1_score": 0.1218435350295814,
+      "v2_risk": "LOW",
+      "v2_score": 0.14779288793910828,
+      "expected_demo_risk": "LOW",
+      "passed": true,
+      "reasons": [
+        "NO_CORROBORATED_HAZARD"
+      ]
+    },
+    {
+      "scenario": "sudden_120",
+      "input_last_temperature_c": 120.0,
+      "input_last_ir": 0,
+      "v1_risk": "MEDIUM",
+      "v1_score": -0.01766558977139554,
+      "v2_risk": "HIGH",
+      "v2_score": -0.09004984343036182,
+      "expected_demo_risk": "HIGH",
+      "passed": true,
+      "reasons": [
+        "HIGH_TEMPERATURE",
+        "ELEVATED_TEMPERATURE",
+        "RAPID_TEMPERATURE_RISE",
+        "AI_ANOMALY_UNCORROBORATED"
+      ]
+    }
+  ],
+  "passed": 21,
+  "total": 21
+}

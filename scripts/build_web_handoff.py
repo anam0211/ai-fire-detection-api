@@ -42,7 +42,7 @@ def main():
     write_json("web_client/ai-api.postman_collection.json", {
         "info": {
             "name": "AI Fire API - Web Integration",
-            "description": "Use a private API key in the selected environment. No cloud URL has been deployed by this bundle.",
+            "description": "Temperature/IR API v2. Keep the API key private. LOW IR alone; confirmed IR plus heat can be HIGH. See WEB_INTEGRATION.md.",
             "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
         },
         "auth": {"type": "apikey", "apikey": [
@@ -58,7 +58,15 @@ def main():
             request_item("Temperature spike (after warmup)", "POST", "/api/v1/sensor-data",
                          body={**sample, "temperature": 120}),
             request_item("Direct IR signal (new test device)", "POST", "/api/v1/sensor-data",
-                         body={**sample, "device_id": "{{device_id}}_ir", "infrared": 1}),
+                         body={**sample, "device_id": "{{device_id}}_ir", "infrared": 1},
+                         description="IR alone at stable room temperature returns LOW, alarm_suggested=false."),
+            request_item("IR + 65 C warning", "POST", "/api/v1/sensor-data",
+                         body={**sample, "device_id": "{{device_id}}_warning", "temperature": 65, "infrared": 1}),
+            request_item("IR + 75 C (send 3 samples over >=2 seconds)", "POST", "/api/v1/sensor-data",
+                         body={**sample, "device_id": "{{device_id}}_fusion", "temperature": 75, "infrared": 1},
+                         description="First sample MEDIUM; HIGH after >=3 consecutive IR samples spanning >=2 seconds. Do not burst requests."),
+            request_item("85 C immediate HIGH without IR", "POST", "/api/v1/sensor-data",
+                         body={**sample, "device_id": "{{device_id}}_thermal", "temperature": 85}),
             request_item("Invalid payload -> 422", "POST", "/api/v1/sensor-data",
                          body={**sample, "temperature": 126}, expected=422),
             request_item("No API key -> 401", "POST", "/api/v1/sensor-data",

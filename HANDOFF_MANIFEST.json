@@ -3,8 +3,8 @@
   "files": [
     {
       "path": "api.py",
-      "bytes": 11276,
-      "sha256": "491ee1d62c7be6f635f579c9daf20083712c795bfc87fdbefb3fc6c57430b7b4"
+      "bytes": 250,
+      "sha256": "e3279962f4e2afde806db9539d91d6fa6ea5b25f91904dc444e07f88f0a9e292"
     },
     {
       "path": "model.joblib",
@@ -63,18 +63,18 @@
     },
     {
       "path": "README.md",
-      "bytes": 13541,
-      "sha256": "26289b4acb98d6004842d6fb43544fa76f0ede0b92df7294ff9a6d8429735997"
+      "bytes": 4195,
+      "sha256": "a30c3e330932537244137995f7e789168b54a7bfec5b066ee77b4ba982833437"
     },
     {
       "path": "API_DOCUMENTATION.md",
-      "bytes": 8505,
-      "sha256": "0b53372439607d156ecef4e9ab6ec0f9578f367e6c23e10abca7bc09250ff6aa"
+      "bytes": 6400,
+      "sha256": "703c9e71326b01bd7b4ae90eea32f38980877f2c70e0568cd7c74321191c3fe0"
     },
     {
       "path": "INTEGRATION_GUIDE.md",
-      "bytes": 8830,
-      "sha256": "5db0f91cc9d0bd7a480880fbe20aec21215075944f5447fa799f42e8c024f91f"
+      "bytes": 9089,
+      "sha256": "7f34fa4550b203d2b533874790461841174166a50d3b8747dae2cc19414b74aa"
     },
     {
       "path": "ENVIRONMENT_VARIABLES.md",
@@ -83,8 +83,8 @@
     },
     {
       "path": "TEST_REPORT.md",
-      "bytes": 7332,
-      "sha256": "a6d9f06ef005be91b2b8f34ed6cd7fef2f4185d94e3aeb3b6282b166caa1ed5e"
+      "bytes": 8563,
+      "sha256": "f74bcba1a7ef4937d8a7a8d04e714fdbc7a5f7d3fd719b8a5aa2892adda7fad0"
     },
     {
       "path": "train_fire_ai_colab.ipynb",
@@ -98,13 +98,13 @@
     },
     {
       "path": "tests/test_api.py",
-      "bytes": 15130,
-      "sha256": "eaaacb366f7bd800a57ccd1a598219ca41db58c53ef11801664219901666a8b0"
+      "bytes": 15144,
+      "sha256": "0bf55f5251e1521c3d877ed65b6522a028745d378bdeb0180493e34cdfa8595e"
     },
     {
       "path": "scripts/smoke_test.py",
-      "bytes": 6824,
-      "sha256": "37d666f5bdd5d5de7d965fd8bf7997183a74dde63a94d2b2bdfa4510ed3b356f"
+      "bytes": 7977,
+      "sha256": "63543b621f8fad445355ee9cdcabf26ffc2bf41e8bd2c52591d13e1b1e72b630"
     },
     {
       "path": "scripts/verify_local.py",
@@ -113,8 +113,8 @@
     },
     {
       "path": "scripts/build_handoff.py",
-      "bytes": 3984,
-      "sha256": "09190ece4657dd5303c5799f0604cd5a2e11a23c7d4e7b6de3aea33e0e3bc358"
+      "bytes": 4447,
+      "sha256": "ae27f8a33869a7e7ac1100aa72b21bdc0be2a90b223598cd94c2ca270e83027e"
     },
     {
       "path": "examples/dashboard_fetch.js",
@@ -133,18 +133,18 @@
     },
     {
       "path": "openapi.json",
-      "bytes": 11743,
-      "sha256": "12268ca4775131843bdd622c4d514fed200013b4e74b3bafb976251ce52025ca"
+      "bytes": 11058,
+      "sha256": "62052b87bb3c2e6e730e725b88e75d430e80066e14a77549c0aa0c9c5fef9d73"
     },
     {
       "path": "WEB_INTEGRATION.md",
-      "bytes": 5760,
-      "sha256": "26c981a4d6f78470ca4dcf707c4abd80645caea6552f5ad024e5cf6701467cdd"
+      "bytes": 4126,
+      "sha256": "07f35a4068e77d6e752492f3dda44000ff8f6aa72931f30bed06b8f21287f586"
     },
     {
       "path": "scripts/build_web_handoff.py",
-      "bytes": 4243,
-      "sha256": "06a8325025a394ecf5b362bbf213a27ee6d4306809459e0e651c9b9b16997b80"
+      "bytes": 5123,
+      "sha256": "4c6a6582efa10a16b0f81d3b34d8aaadadedc9f0616cf284347db7f333910829"
     },
     {
       "path": "web_client/ai-client.mjs",
@@ -158,8 +158,8 @@
     },
     {
       "path": "web_client/verify.mjs",
-      "bytes": 1826,
-      "sha256": "80630f4f38bcdcc8fb40a98bc2d4c15c38bb7cae6e723efba8334fabdd99ba54"
+      "bytes": 2360,
+      "sha256": "b700a6309e28310223efc099a64391bb0cb1e2446f95f856e7c515b9ae5ba4c1"
     },
     {
       "path": "web_client/.env.example",
@@ -168,13 +168,98 @@
     },
     {
       "path": "web_client/ai-api.postman_collection.json",
-      "bytes": 6233,
-      "sha256": "581ada08e0c0408a00d15f6c10f9ad8bc9c28a3333f3cc8e8de3e52ec0ee1a1d"
+      "bytes": 9119,
+      "sha256": "a90f838be356c3b84fc93391394c36ac6c6bdc855fba79394df4243901619d99"
     },
     {
       "path": "web_client/local.postman_environment.json",
       "bytes": 437,
       "sha256": "d094ea5aa9c7b0e0ae09fa6aa0664bea2785beb35a435a3866769ff80e1cb5df"
+    },
+    {
+      "path": "legacy_api.py",
+      "bytes": 11276,
+      "sha256": "491ee1d62c7be6f635f579c9daf20083712c795bfc87fdbefb3fc6c57430b7b4"
+    },
+    {
+      "path": "risk_v2/__init__.py",
+      "bytes": 85,
+      "sha256": "b29bc9e47c5dbcec39d0078dc9132d48a9dd67d7636d0ebb4ad3d96445061d28"
+    },
+    {
+      "path": "risk_v2/api.py",
+      "bytes": 4588,
+      "sha256": "43b0551736435ea54a3084b8e8ff255dc4a721a394071e2ff1e5aa9150597bb0"
+    },
+    {
+      "path": "risk_v2/engine.py",
+      "bytes": 10139,
+      "sha256": "901e2d308f79f507402dd73a3ec31effe1fde3436eb41e42e31115588ecced34"
+    },
+    {
+      "path": "risk_v2/policy.json",
+      "bytes": 575,
+      "sha256": "836fa7b847981cfeebddc60fc24881fd411ce36675f236c632742168a519ed33"
+    },
+    {
+      "path": "risk_v2/model_candidate_v2.joblib",
+      "bytes": 805343,
+      "sha256": "ce58e4321ca0948642a8b1f5e7fe021d8a1a1eb9d98bda17b8c88104d6647fae"
+    },
+    {
+      "path": "risk_v2/model_candidate_v2.training.json",
+      "bytes": 6697,
+      "sha256": "623f95e342efeef9f7fbfa0536692f4f322fabab9a3321b66b06ccda01a5d4cd"
+    },
+    {
+      "path": "risk_v2/evaluation.json",
+      "bytes": 8853,
+      "sha256": "8ae35e92e9522cd5c32d6a02d5a47d10d468797713d891b1e4619651b4c7e9dc"
+    },
+    {
+      "path": "risk_v2/openapi.json",
+      "bytes": 11058,
+      "sha256": "62052b87bb3c2e6e730e725b88e75d430e80066e14a77549c0aa0c9c5fef9d73"
+    },
+    {
+      "path": "risk_v2/README.md",
+      "bytes": 10386,
+      "sha256": "f65ddf24ccb9c59bf20fc11e1fff7c51873f71bf27a69d7b3ecfb43c4f7800bb"
+    },
+    {
+      "path": "risk_v2/sensor-log.csv.example",
+      "bytes": 189,
+      "sha256": "5cf50ffeb67c53a9cab86c36ae287daea00124baf46f1ad07446b4290438ae33"
+    },
+    {
+      "path": "risk_v2/verify-client.mjs",
+      "bytes": 1062,
+      "sha256": "49f1ee1eb39b315370e4e7d38d55a336b8ad0856044078849da84d903b3944c6"
+    },
+    {
+      "path": "scripts/train_temperature_v2.py",
+      "bytes": 8269,
+      "sha256": "9d1323327ec78459c74d68fe6b1d25e22ab05da44152d0607ab2485daadcff0b"
+    },
+    {
+      "path": "scripts/evaluate_risk_v2.py",
+      "bytes": 3928,
+      "sha256": "f3e285013a22b95294abb95603325a441eaf82779f00f68c75b50d272b53cf7d"
+    },
+    {
+      "path": "scripts/verify_risk_v2.py",
+      "bytes": 5216,
+      "sha256": "c723ad77b923c21610c4c1915912af30d5d81e0b274b8a262ac7b4374ac99861"
+    },
+    {
+      "path": "tests/test_risk_v2.py",
+      "bytes": 13793,
+      "sha256": "a8872945bd641e152fa2f6d92c696e535c90584688c6e010e742debb7b45fea0"
+    },
+    {
+      "path": "DEPLOYMENT_REPORT.md",
+      "bytes": 3544,
+      "sha256": "a9660767eb50b7a1c73c5d76c39e4777b1a757ef4f47b9e56553e402e84737d7"
     }
   ]
 }

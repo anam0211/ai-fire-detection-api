@@ -1,0 +1,439 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Fire API - DS18B20 temperature and IR",
+    "version": "2.0.0-demo"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sensor-data": {
+      "post": {
+        "summary": "Sensor Data",
+        "operationId": "sensor_data_api_v1_sensor_data_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SensorSample"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SensorStatus"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ]
+      }
+    },
+    "/api/v1/status/{device_id}": {
+      "get": {
+        "summary": "Read Status",
+        "operationId": "read_status_api_v1_status__device_id__get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "device_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "title": "Device Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SensorStatus"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AIResult": {
+        "properties": {
+          "model": {
+            "type": "string",
+            "const": "IsolationForest",
+            "title": "Model"
+          },
+          "ready": {
+            "type": "boolean",
+            "title": "Ready"
+          },
+          "result": {
+            "type": "string",
+            "enum": [
+              "INSUFFICIENT_DATA",
+              "NORMAL",
+              "ANOMALY",
+              "MODEL_ERROR"
+            ],
+            "title": "Result"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score",
+            "description": "Decision score, not fire probability"
+          }
+        },
+        "type": "object",
+        "required": [
+          "model",
+          "ready",
+          "result",
+          "score"
+        ],
+        "title": "AIResult"
+      },
+      "Assessment": {
+        "properties": {
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reasons"
+          },
+          "temperature_rise_c_per_min": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperature Rise C Per Min"
+          },
+          "observation_seconds": {
+            "type": "number",
+            "title": "Observation Seconds"
+          },
+          "policy_version": {
+            "type": "string",
+            "title": "Policy Version"
+          },
+          "model_version": {
+            "type": "string",
+            "title": "Model Version"
+          },
+          "training_provenance": {
+            "type": "string",
+            "enum": [
+              "synthetic_demo",
+              "real_sensor_data"
+            ],
+            "title": "Training Provenance"
+          },
+          "experimental": {
+            "type": "boolean",
+            "const": true,
+            "title": "Experimental"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reasons",
+          "temperature_rise_c_per_min",
+          "observation_seconds",
+          "policy_version",
+          "model_version",
+          "training_provenance",
+          "experimental"
+        ],
+        "title": "Assessment"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthStatus": {
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "title": "Ok"
+          },
+          "model": {
+            "type": "string",
+            "const": "IsolationForest",
+            "title": "Model"
+          },
+          "window_size": {
+            "type": "integer",
+            "const": 10,
+            "title": "Window Size"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ok",
+          "model",
+          "window_size"
+        ],
+        "title": "HealthStatus"
+      },
+      "SensorSample": {
+        "properties": {
+          "device_id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "title": "Device Id"
+          },
+          "temperature": {
+            "type": "number",
+            "maximum": 125.0,
+            "minimum": -40.0,
+            "title": "Temperature",
+            "description": "Degrees Celsius"
+          },
+          "infrared": {
+            "type": "integer",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Infrared",
+            "description": "1=IR flame signal; normalize ESP32 active-LOW logic before POST"
+          }
+        },
+        "type": "object",
+        "required": [
+          "device_id",
+          "temperature",
+          "infrared"
+        ],
+        "title": "SensorSample"
+      },
+      "SensorStatus": {
+        "properties": {
+          "device_id": {
+            "type": "string",
+            "title": "Device Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "COLLECTING",
+              "NORMAL",
+              "ANOMALY",
+              "FLAME_SIGNAL",
+              "THERMAL_WARNING",
+              "THERMAL_DANGER",
+              "RECOVERY_HOLD"
+            ],
+            "title": "Status"
+          },
+          "risk_level": {
+            "type": "string",
+            "enum": [
+              "UNKNOWN",
+              "LOW",
+              "MEDIUM",
+              "HIGH"
+            ],
+            "title": "Risk Level"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "SYSTEM",
+              "AI",
+              "DIRECT_SENSOR",
+              "THERMAL_RULE",
+              "SENSOR_FUSION",
+              "HYSTERESIS"
+            ],
+            "title": "Source"
+          },
+          "sensors": {
+            "$ref": "#/components/schemas/SensorValues"
+          },
+          "ai": {
+            "$ref": "#/components/schemas/AIResult"
+          },
+          "alarm_suggested": {
+            "type": "boolean",
+            "title": "Alarm Suggested"
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          },
+          "online": {
+            "type": "boolean",
+            "title": "Online"
+          },
+          "assessment": {
+            "$ref": "#/components/schemas/Assessment"
+          }
+        },
+        "type": "object",
+        "required": [
+          "device_id",
+          "status",
+          "risk_level",
+          "source",
+          "sensors",
+          "ai",
+          "alarm_suggested",
+          "timestamp",
+          "online",
+          "assessment"
+        ],
+        "title": "SensorStatus"
+      },
+      "SensorValues": {
+        "properties": {
+          "temperature": {
+            "type": "number",
+            "title": "Temperature"
+          },
+          "infrared": {
+            "type": "integer",
+            "enum": [
+              0,
+              1
+            ],
+            "title": "Infrared"
+          }
+        },
+        "type": "object",
+        "required": [
+          "temperature",
+          "infrared"
+        ],
+        "title": "SensorValues"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "APIKeyHeader": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      }
+    }
+  }
+}

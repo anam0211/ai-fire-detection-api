@@ -6,7 +6,7 @@ Người tích hợp chỉ cần kết nối mạng, URL HTTPS, key và ID thi�
 
 | Thông tin | Ví dụ / lưu ý |
 | --- | --- |
-| API base URL | URL thực từ Render, dạng `https://YOUR-SERVICE.onrender.com`; ví dụ này là placeholder, chưa deploy. |
+| API base URL | `https://ai-fire-detection-api.onrender.com`; xem WEB_INTEGRATION.md cho hợp đồng API v2. |
 | API key | Cấp riêng, gửi bằng `X-API-Key`; không nhúng vào repo, ảnh chụp hoặc URL. |
 | Device ID | `esp32_01`, duy nhất; Dashboard đọc đúng ID ESP32 gửi. |
 | Dashboard origin | Ví dụ `https://dashboard.example.com`; chủ API đưa vào `DASHBOARD_ORIGINS`. Origin gồm scheme + hostname + port nếu có, không có path hoặc `/` cuối. |
@@ -80,8 +80,10 @@ Poll tuần tự khoảng 2 giây/lần: chờ request trước hoàn tất rồ
 | `COLLECTING`, `ai.ready=false` | Đang thu 10 mẫu; chưa có kết quả AI. |
 | Gửi lại sau khoảng ngừng >=10 giây | AI thu lại 10 mẫu mới, IR vẫn có hiệu lực ngay. |
 | `NORMAL` | Model chưa thấy bất thường; không khẳng định an toàn. |
-| `ANOMALY` | Bất thường nhiệt độ/IR; cần kiểm tra, không ghi “AI xác nhận cháy”. |
-| `FLAME_SIGNAL` | Cảm biến IR có tín hiệu lửa; nguồn `DIRECT_SENSOR`. |
+| `ANOMALY` | Bất thường nhiệt độ; đọc risk_level/alarm_suggested, không tự suy ra nguy hiểm từ score âm. |
+| `FLAME_SIGNAL` | Có IR; có thể LOW/MEDIUM/HIGH tùy nhiệt độ và thời gian xác nhận. |
+| `THERMAL_WARNING`, `THERMAL_DANGER` | Cảnh báo theo nhiệt độ/tốc độ tăng nhiệt; đọc risk_level. |
+| `RECOVERY_HOLD` | Giữ cảnh báo cho đến khi đủ điều kiện nguội/xác nhận, tránh nhảy mức. |
 | `ai.result=MODEL_ERROR` | AI lỗi; tín hiệu IR vẫn được giữ nếu có. |
 | `online=false` | Hiển thị mất kết nối cùng timestamp/kết quả cuối, tránh trình bày như dữ liệu mới. |
 | Timeout, `503`, lỗi mạng | API/AI chưa sẵn sàng; không suy diễn thành NORMAL hoặc an toàn. |

@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "AI Fire API - Web Integration",
-    "description": "Use a private API key in the selected environment. No cloud URL has been deployed by this bundle.",
+    "description": "Temperature/IR API v2. Keep the API key private. LOW IR alone; confirmed IR plus heat can be HIGH. See WEB_INTEGRATION.md.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -139,7 +139,7 @@
       "request": {
         "method": "POST",
         "url": "{{base_url}}/api/v1/sensor-data",
-        "description": "",
+        "description": "IR alone at stable room temperature returns LOW, alarm_suggested=false.",
         "header": [
           {
             "key": "Content-Type",
@@ -149,6 +149,108 @@
         "body": {
           "mode": "raw",
           "raw": "{\n  \"device_id\": \"{{device_id}}_ir\",\n  \"temperature\": 29.2,\n  \"infrared\": 1\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "IR + 65 C warning",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/v1/sensor-data",
+        "description": "",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"device_id\": \"{{device_id}}_warning\",\n  \"temperature\": 65,\n  \"infrared\": 1\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "IR + 75 C (send 3 samples over >=2 seconds)",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/v1/sensor-data",
+        "description": "First sample MEDIUM; HIGH after >=3 consecutive IR samples spanning >=2 seconds. Do not burst requests.",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"device_id\": \"{{device_id}}_fusion\",\n  \"temperature\": 75,\n  \"infrared\": 1\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "85 C immediate HIGH without IR",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/v1/sensor-data",
+        "description": "",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"device_id\": \"{{device_id}}_thermal\",\n  \"temperature\": 85,\n  \"infrared\": 0\n}",
           "options": {
             "raw": {
               "language": "json"
